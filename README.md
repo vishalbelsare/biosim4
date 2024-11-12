@@ -1,5 +1,12 @@
 # biosim4
 
+## Status
+
+This project is transitioning to maintenance-only. Thanks to all who contributed 
+improvements to this project. We will continue to welcome bug fixes that enable this
+program to compile and execute, and we welcome discussions about this program
+and related topics in the Issues section.
+
 ## What is this?
 
 This pile of code was used to simulate biological creatures that evolve through natural selection.
@@ -9,9 +16,10 @@ The results of the experiments are summarized in this YouTube video:
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;https://www.youtube.com/watch?v=N3tRFayqVtk
 
-This code lacks a friendly interface, so compiling and executing the program may
+This command line program lacks a friendly interface, so compiling and executing the program may
 require attention to details. If you ask questions in the Issues,
-I'll try to help if I can.
+I'll try to help if I can. For a nicer user interface, check out the
+[fork of this project](https://github.com/ilyabrilev/biosim4) hosted by @ilyabrilev.
 
 Document Contents
 -----------------
@@ -74,7 +82,7 @@ simulation run. The biosim4 executable reads the config file at startup, then mo
 changes during the simulation. Although it's not foolproof, many parameters can be modified during
 the simulation run. Class ParamManager (see params.h and params.cpp) manages the configuration
 parameters and makes them available to the simulator through a read-only pointer provided by
-ParamManager::getParamRef(). 
+ParamManager::getParamRef().
 
 See the provided biosim4.ini for documentation for each parameter. Most of the parameters
 in the config file correspond to members in struct Params (see params.h). A few additional
@@ -189,7 +197,7 @@ but large radii require lots of CPU cycles.
 ## Installing the code
 --------------------
 
-Copy the directory structure to a location of your choice. 
+Copy the directory structure to a location of your choice.
 
 <a name="BuildingTheExecutable"></a>
 ## Building the executable
@@ -200,10 +208,10 @@ Copy the directory structure to a location of your choice.
 
 This code is known to run in the following environment:
 
-* Ubuntu 21.04
-* cimg-dev 2.8.4 or later
-* libopencv-dev 4.2 or later
-* gcc 9.3 or 10.3
+* Ubuntu 21.04, 22.04, or Debian 10 (Buster)
+* cimg-dev 2.4.5 or later
+* libopencv-dev 3.2 or later
+* gcc 8.3, 9.3 or 10.3
 * python-igraph 0.8.3 (used only by tools/graph-nnet.py)
 * gnuplot 5.2.8 (used only by tools/graphlog.gp)
 
@@ -213,16 +221,24 @@ cimg-dev is replaced with version 2.8.4 or later.
 <a name="Compiling"></a>
 ### Compiling
 
-Two (and a half) ways to compile:
+You have several options:
 
-* The file named "biosim4.cbp" is a configuration file for the Code::Blocks IDE version 20.03.
+#### Code::Blocks project file
 
-* A Makefile is provided which
-was created from biosim4.cbp with cbp2make, but is not tested. A default "make" will generate a debug and a
-release version.
+The file named "biosim4.cbp" is a configuration file for the Code::Blocks IDE version 20.03.
 
+#### Makefile
 
-* A Dockerfile is provided which leverages the aforementioned Makefile.
+A Makefile is provided which was created from biosim4.cbp with cbp2make. Possible make commands include:
+
+* "make" with no arguments makes release and debug versions in ./bin/Release and ./bin/Debug
+* "make release" makes a release version in ./bin/Release
+* "make debug" makes a debug version in ./bin/Debug
+* "make clean" removes the intermediate build files
+
+#### Docker
+
+A Dockerfile is provided which leverages the aforementioned Makefile.
 
 To build a Docker environment in which you can compile the program:
 
@@ -230,12 +246,54 @@ To build a Docker environment in which you can compile the program:
 docker build -t biosim4 .
 ```
 
-You can then compile the program with an ephemeral container:
+You can then compile the program with an ephemeral container. Note that `pwd` stands for the fullpath of your `biosim4` project, something like `C:/full-path-in-windows/to-your/biosim4-folder/biosim4` in Windows, or `/home/user/project-path/biosim4/` in Linux/MacOS:
 
 ```sh
 docker run --rm -ti -v `pwd`:/app --name biosim biosim4 make
 ```
 When you exit the container, the files compiled in your container files will persist in `./bin`.
+
+#### CMake
+
+A `CMakeList.txt` file is provided to allow development, build, test, installation and packaging with the CMake tool chain and all IDEs that support CMake. 
+
+To build with cmake you need to install cmake. 
+
+If you're using docker, `cmake` is already installed in the image. You can directly open its terminal to use it:
+```sh
+docker run --rm -ti -v `pwd`:/app --name biosim biosim4 bash
+```
+
+Once cmake is installed, use the procedure below:
+```sh
+mkdir build
+cd build
+cmake ../
+cmake --build ./
+```
+
+To make a test installation and run the program:
+
+```sh
+mkdir build
+cd build
+cmake ../
+cmake --build ./
+mkdir test_install
+cmake --install ./ --prefix ./test_install
+cd test_install
+./bin/biosim4
+```
+
+To make a release package:
+
+```sh
+mkdir build
+cd build
+cmake ../
+cmake --build ./
+cpack ./
+```
 
 <a name="Bugs"></a>
 ## Bugs
@@ -250,11 +308,16 @@ In biosim4, CImg.h is used only as a convenient interface to OpenCV
 to generate movies of the simulated creatures in their 2D world. You have several
 choices if you want to proceed with Ubuntu 20.04:
 
-* You can strip out the code that generates the movies and just run the simulator without the movies. Most of 
+* You can strip out the code that generates the movies and just run the simulator without the movies. Most of
 that graphics code is in imageWriter.cpp and imageWriter.h.
 
-* You can upgrade your CImg.h to version 2.8.4 or later by getting it from the appropriate Debian repository.
-Sorry I don't have the instructions at hand to do this.
+* You can upgrade your CImg.h to version 2.8.4 or later by installing the [Ubuntu 22.04 cimg-dev package](https://packages.ubuntu.com/jammy/cimg-dev), For example:
+```
+cd /tmp && \
+wget http://mirrors.kernel.org/ubuntu/pool/universe/c/cimg/cimg-dev_2.9.4+dfsg-3_all.deb -O cimg-dev_2.9.4+dfsg-3_all.deb && \
+sudo apt install ./cimg-dev_2.9.4+dfsg-3_all.deb && \
+rm cimg-dev_2.9.4+dfsg-3_all.deb;
+```
 
 * You could convert the CImg.h function calls to use OpenCV directly. Sorry I don't have a guide for how
 to do that.
@@ -263,15 +326,21 @@ to do that.
 ## Execution
 --------------------
 
-Edit the config file (default "biosim4.ini") for the parameters you want for the simulation run, then execute the Debug
-or Release executable in the bin directory. Optionally specify the name of the config file as the first
-command line argument, e.g.:
+Test everything is working by executing the Debug or Release executable in the bin directory with the default config file ("biosim4.ini"). e.g.:
+```
+./bin/Release/biosim4 biosim4.ini
+```
+
+You should have output something like:
+`Gen 1, 2290 survivors`
+
+If this works then edit the config file ("biosim4.ini") for the parameters you want for the simulation run and execute the Debug or Release executable. Optionally specify the name of the config file as the first command line argument, e.g.:
 
 ```
 ./bin/Release/biosim4 [biosim4.ini]
 ```
 
-Note: If using docker, 
+Note: If using docker,
 ```sh
 docker run --rm -ti -v `pwd`:/app --name biosim biosim4 bash
 ```
@@ -295,7 +364,7 @@ connection diagram using igraph. The file net.txt contains an encoded form of on
 must be the same format as the files
 generated by displaySampleGenomes() in src/analysis.cpp which is called by simulator() in
 src/simulator.cpp. The genome output is printed to stdout automatically
-if the parameter named "displaySampleGenomes" is set to nonzero in the config file. 
+if the parameter named "displaySampleGenomes" is set to nonzero in the config file.
 An individual genome can be copied from that output stream and renamed "net.txt" in order to run
 graph-nnet.py.
 
@@ -351,5 +420,5 @@ Output file is bin/Release/biosim4 with size 778.42 KB
 Process terminated with status 0 (0 minute(s), 11 second(s))
 0 error(s), 0 warning(s) (0 minute(s), 11 second(s))
 ```
- 
+
 

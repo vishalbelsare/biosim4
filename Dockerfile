@@ -1,4 +1,4 @@
-FROM docker.io/ubuntu:impish-20211102
+FROM docker.io/ubuntu:latest
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && apt-get install -yqq \
@@ -8,12 +8,13 @@ RUN apt-get update && apt-get install -yqq \
 	&& apt-get clean \
 	&& rm -rf /var/lib/apt/lists/*
 
-RUN pip install igraph
+RUN apt-get update && apt-get install -yqq python3-igraph
 
 RUN apt-get update && apt-get install -yqq \
 	cimg-dev \
 	gnuplot \
 	libopencv-dev \
+	cmake \
 	&& apt-get clean \
 	&& rm -rf /var/lib/apt/lists/*
 
