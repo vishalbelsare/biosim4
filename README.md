@@ -1,5 +1,12 @@
 # biosim4
 
+## Status
+
+This project is transitioning to maintenance-only. Thanks to all who contributed 
+improvements to this project. We will continue to welcome bug fixes that enable this
+program to compile and execute, and we welcome discussions about this program
+and related topics in the Issues section.
+
 ## What is this?
 
 This pile of code was used to simulate biological creatures that evolve through natural selection.
@@ -248,16 +255,16 @@ When you exit the container, the files compiled in your container files will per
 
 #### CMake
 
-A `CMakeList.txt` file is provided to allow development, build, test, installation and packaging with the CMake tool chain and all IDE's that support CMake. 
+A `CMakeList.txt` file is provided to allow development, build, test, installation and packaging with the CMake tool chain and all IDEs that support CMake. 
 
 To build with cmake you need to install cmake. 
 
-If you're using docker, `cmake` is already installed in the image. So, you can directly open its terminal to use it:
+If you're using docker, `cmake` is already installed in the image. You can directly open its terminal to use it:
 ```sh
 docker run --rm -ti -v `pwd`:/app --name biosim biosim4 bash
 ```
 
-Once cmake is installed use the procedure below:
+Once cmake is installed, use the procedure below:
 ```sh
 mkdir build
 cd build
